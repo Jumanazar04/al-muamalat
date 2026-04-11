@@ -6,10 +6,10 @@ import Link from "next/link";
 export default function AuthPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="w-full max-w-6xl bg-white rounded-3xl overflow-hidden flex">
+      <div className="w-full max-w-6xl bg-white rounded-3xl overflow-hidden flex flex-col md:flex-row">
         
         {/* LEFT SIDE */}
-        <div className="w-1/2 p-10 flex flex-col justify-center">
+        <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center">
             <div className="mb-10">
                 <a href="/" className="flex  items-center gap-2.5 flex-shrink-0">
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -54,7 +54,8 @@ export default function AuthPage() {
         </div>
 
         {/* RIGHT SIDE */}
-        <div className="w-1/2 bg-teal-600 text-white flex flex-col items-center justify-center p-10 relative rounded-l-[100px]">
+        <div className="w-full md:w-1/2 bg-teal-600 text-white flex flex-col items-center justify-center p-6 md:p-10 
+        md:rounded-l-[100px] rounded-b-3xl md:rounded-b-none">
           
           {/* Illustration placeholder */}
           <div className="">
