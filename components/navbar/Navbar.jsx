@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { Bars3Icon, ChevronDownIcon, XMarkIcon } from "@heroicons/react/20/solid";
+import Link from "next/link";
 
 const BRAND = "#009688";
 const BRAND_DARK = "#00796b";
@@ -115,14 +116,14 @@ export default function Navbar() {
           <div className="w-px h-7 bg-gray-200" />
 
           {/* Button */}
-          <button
+          <Link href="/login"
             className="text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors hidden md:flex "
             style={{ backgroundColor: BRAND }}
             onMouseEnter={(e) => (e.target.style.backgroundColor = BRAND_DARK)}
             onMouseLeave={(e) => (e.target.style.backgroundColor = BRAND)}
           >
             Sign in
-          </button> 
+          </Link> 
         </div>
 
                 <button
