@@ -77,8 +77,8 @@ export default function AuthPage() {
             <Image
               src="/login-illustration.png"
               alt="Login Illustration"
-              width={220}
-              height={260}
+              width={380}
+              height={400}
               className="md:w-64 md:h-80 object-contain"
             />
           </div>

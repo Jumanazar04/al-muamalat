@@ -187,12 +187,12 @@ export default function Navbar() {
           </div>
 
           {/* Button */}
-          <Link href="/login"
-            className="mt-4 text-white py-2 rounded-lg"
+          <a href="/login"
+            className="mt-4 text-white py-2 rounded-lg text-center transition-colors"
             style={{ backgroundColor: BRAND }}
           >
             Sign in
-          </Link>
+          </a>
         </div>
       </div>
     </nav>

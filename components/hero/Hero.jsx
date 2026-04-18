@@ -22,7 +22,7 @@ export default function HeroSection() {
           </span>
 
           {/* Title */}
-          <h1 className=" md:text-4xl/snug lg:text-5xl/relaxed font-extrabold text-white leading-tight tracking-tight ">
+          <h1 className="text-3xl md:text-4xl/snug lg:text-5xl/relaxed font-extrabold text-white leading-tight tracking-tight ">
             Enhance Your<br />
             Understanding of Islamic<br />
             Ethics with Al-Muamalat

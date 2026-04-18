@@ -25,7 +25,7 @@ export default function AuthPage() {
             </div>
 
           {/* Title */}
-          <h1 className="text-5xl font-extrabold text-center mb-3">Get started</h1>
+          <h1 className="text-5xl font-extrabold mb-6">Get started</h1>
 
           {/* Form */}
           <div className="flex flex-col gap-4">
