@@ -1,75 +1,134 @@
-'use client';
+"use client";
+
 import { createContext, useState } from "react";
 import { request } from "../services/request";
 
-
 const defaultProvider = {
-    user: null,
-    loading: false,
-    setUser: () => null,
-    setLoading: () => Boolean,
-    login: () => Promise.resolve(),
-    register: () => Promise.resolve(),
-    logout: () => Promise.resolve(),
-}
+  user: null,
+  loading: false,
+  setUser: () => null,
+  setLoading: () => false,
+  login: () => Promise.resolve(),
+  verifyLogin: () => Promise.resolve(),
+  resendLoginOtp: () => Promise.resolve(),
+  register: () => Promise.resolve(),
+  verifySignup: () => Promise.resolve(),
+};
 
-
-const AuthContext = createContext(defaultProvider)
+const AuthContext = createContext(defaultProvider);
 
 const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(defaultProvider.user);
-    const [loading, setLoading] = useState(defaultProvider.loading);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-    const handleLogin = async (params) => {
+  const handleLogin = async (params) => {
     try {
-        setLoading(true);
+      setLoading(true);
 
-        const response = await request.post("/v2/auth/signin/init", params);
-
-        const { accessToken, refreshToken, user } = response.data;
-
-        localStorage.setItem("userToken", accessToken);
-        localStorage.setItem("refreshToken", refreshToken);
-
-        setUser(user);
-
-        return user; 
+      const response = await request.post("/v2/auth/signin/init", params);
+      return response.data.data;
     } catch (error) {
-        throw error; 
+      throw error;
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-    };
-    
-    const handleRegister = async (params) => {
-    try {
-        setLoading(true);
+  };
 
+  const handleVerifyLogin = async (params) => {
+    try {
+      setLoading(true);
+      const response = await request.post("/v2/auth/signin/verify", params);
+      
+      const  user  = response.data.data;
+      const { accessToken, refreshToken, } = response.data.data.tokens;
+
+      console.log("Login verify response:", response.data.data);
+      
+      localStorage.setItem("userToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("user", JSON.stringify(user));
+      
+      setUser(user);
+      return response.data.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendLoginOtp = async (params) => {
+    try {
+      setLoading(true);
+
+      const response = await request.post("/v2/auth/signin/resend", params);
+      return response.data.data;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async (params) => {
+    try {
+      setLoading(true);
         const response = await request.post("/v2/auth/signup/init", params);
-
-        const { accessToken, refreshToken, user } = response.data;
-
-        localStorage.setItem("userToken", accessToken);
-        localStorage.setItem("refreshToken", refreshToken);
-
-        setUser(user);
-
-        return user;
+        return response.data.data;
     } catch (error) {
-        throw error;
+      throw error;
+    } finally {
+      setLoading(false);
+    }   
+    };
+
+  const handleVerifySignup = async (params) => {
+    try {
+      setLoading(true);
+        const response = await request.post("/v2/auth/signup/verify", params);
+        return response.data.data;
+    } catch (error) {
+      throw error;
+    } finally {     
+        setLoading(false);
+    }
+  };
+
+  const handleResendSignupOtp = async (params) => {
+    try {
+      setLoading(true);
+        const response = await request.post("/v2/auth/signup/resend", params);
+        return response.data.data;
+    } catch (error) {
+      throw error;
     } finally {
         setLoading(false);
     }
-    };
+  };
 
-    const values = {
-        user,
-        loading,
-        login: handleLogin,
-        register: handleRegister,
-    }
+  const logout = () => {
+    localStorage.clear();
+    setUser(null);
+    window.location.href = "/login";
+  };
 
-    return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>
-}
 
-export { AuthContext, AuthProvider }
+
+  const values = {
+    user,
+    loading,
+    setUser,
+    setLoading,
+    login: handleLogin,
+    verifyLogin: handleVerifyLogin,
+    resendLoginOtp: handleResendLoginOtp,
+    register: handleRegister,
+    verifySignup: handleVerifySignup,
+    resendSignupOtp: handleResendSignupOtp,
+    logout,
+  };
+
+  return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>;
+};
+
+export { AuthContext, AuthProvider };

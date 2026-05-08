@@ -1,32 +1,69 @@
+
+// register page
 "use client";
+
 import Image from "next/image";
-import { TextField, Button, Select, MenuItem } from "@mui/material";
 import Link from "next/link";
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import {
+  TextField,
+  Button,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  InputAdornment,
+  IconButton,
+  FormHelperText,
+} from "@mui/material";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import Visibility from "@mui/icons-material/Visibility";
+import useAuth from "../../hooks/useAuth";
+import Logo from "../../public/Logo.svg";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function AuthPage() {
+  const Auth = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const {
+    handleSubmit,
+    register,
+    control,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+      phone_number: "",
+      first_name: "",
+      last_name: "",
+    },
+  });
+
+  const onSubmit = async (data) => {
+    try {
+      await Auth.register(data);
+
+      localStorage.setItem("pendingEmail", data.email);
+      window.location.href = "/verify-register";
+      toast.success("Registration successful! Please verify your email."); // Show success toast
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error(error?.response?.data?.message || "Registration failed");
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-6xl bg-white rounded-3xl overflow-hidden flex flex-col md:flex-row">
-        
-        {/* LEFT SIDE */}
         <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center">
-          
-          {/* Logo */}
           <div className="mb-6 md:mb-10 flex justify-center md:justify-start">
             <a href="/" className="flex items-center gap-2.5">
-              <svg width="40" height="40" viewBox="0 0 40 40">
-                <polygon points="20,3 35,12 35,28 20,37 5,28 5,12" fill="none" stroke="#009688" strokeWidth="2.2"/>
-                <rect x="17" y="8" width="6" height="14" rx="1" fill="#FF9800"/>
-                <path d="M11 26 Q20 20 29 26" stroke="#009688" strokeWidth="2" fill="none" strokeLinecap="round"/>
-                <path d="M8 28 Q20 22 32 28" stroke="#009688" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-              </svg>
-              <span className="text-lg font-bold text-teal-600">
-                AL MUAMALAT
-              </span>
+              <Image src={Logo} alt="Logo" width={130} height={60} />
             </a>
           </div>
 
-          {/* Title */}
           <h1 className="text-3xl md:text-5xl font-extrabold text-center md:text-left mb-3">
             Get started
           </h1>
@@ -38,41 +75,99 @@ export default function AuthPage() {
             </Link>
           </p>
 
-          {/* Form */}
           <div className="flex flex-col gap-4">
-            <TextField label="Enter your name" fullWidth />
-            <TextField label="Enter your email" fullWidth />
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+              <TextField
+                label="First Name"
+                fullWidth
+                {...register("first_name", { required: "First name is required" })}
+                error={!!errors.first_name}
+                helperText={errors.first_name?.message}
+              />
 
-            <Select fullWidth defaultValue={10}>
-              <MenuItem value={10}>Uzbekistan</MenuItem>
-              <MenuItem value={20}>England</MenuItem>
-              <MenuItem value={30}>Russia</MenuItem>
-            </Select>
+              <TextField
+                label="Last Name"
+                fullWidth
+                {...register("last_name", { required: "Last name is required" })}
+                error={!!errors.last_name}
+                helperText={errors.last_name?.message}
+              />
 
-            <Button
-              fullWidth
-              sx={{
-                backgroundColor: "#009688",
-                color: "white",
-                borderRadius: "10px",
-                padding: "10px",
-                textTransform: "none",
-                fontWeight: "bold",
-                "&:hover": {
-                  backgroundColor: "#00796B",
-                },
-              }}
-            >
-              Log in
-            </Button>
+              <TextField
+                label="Phone Number"
+                placeholder="+998901234567"
+                fullWidth
+                {...register("phone_number", { required: "Phone number is required" })}
+                error={!!errors.phone_number}
+                helperText={errors.phone_number?.message}
+              />
+
+              <TextField
+                label="Email"
+                fullWidth
+                {...register("email", { required: "Email is required" })}
+                error={!!errors.email}
+                helperText={errors.email?.message}
+              />
+
+              <Controller
+                name="password"
+                control={control}
+                rules={{
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Min 6 characters",
+                  },
+                }}
+                render={({ field }) => (
+                  <FormControl fullWidth error={!!errors.password}>
+                    <InputLabel htmlFor="password">Password</InputLabel>
+                    <OutlinedInput
+                      {...field}
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      }
+                      label="Password"
+                    />
+                    <FormHelperText>{errors.password?.message}</FormHelperText>
+                  </FormControl>
+                )}
+              />
+
+              <Button
+                type="submit"
+                fullWidth
+                disabled={Auth.loading}
+                sx={{
+                  backgroundColor: "#009688",
+                  color: "white",
+                  borderRadius: "5px",
+                  padding: "10px",
+                  textTransform: "none",
+                  fontWeight: "bold",
+                  "&:hover": {
+                    backgroundColor: "#00796B",
+                  },
+                }}
+              >
+                {Auth.loading ? "Loading..." : "Sign Up"}
+              </Button>
+              <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
+            </form>
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
-        <div className="w-full md:w-1/2 bg-teal-600 text-white flex flex-col items-center justify-center p-6 md:p-10 
-        md:rounded-l-[100px] rounded-b-3xl md:rounded-b-none">
-          
-          {/* Image */}
+        <div className="w-full md:w-1/2 bg-teal-600 text-white flex flex-col items-center justify-center p-6 md:p-10 md:rounded-l-[100px] rounded-b-3xl md:rounded-b-none">
           <div className="mb-8 md:mb-16 mt-4 md:mt-6">
             <Image
               src="/login-illustration.png"
@@ -83,9 +178,8 @@ export default function AuthPage() {
             />
           </div>
 
-          {/* Text */}
           <h2 className="text-lg md:text-2xl font-bold text-center leading-relaxed px-4">
-            Welcome to Al Muamalat – <br />
+            Welcome to Al Muamalat - <br />
             Empowering Your Journey in <br />
             Islamic Finance
           </h2>

@@ -1,11 +1,11 @@
 "use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import useAuth from "../../hooks/useAuth";
-
+import {useQuery} from '@tanstack/react-query';
+import {ToastContainer, toast} from 'react-toastify';
 import {
   TextField,
   Button,
@@ -16,7 +16,6 @@ import {
   FormHelperText,
   InputLabel,
 } from "@mui/material";
-
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Visibility from "@mui/icons-material/Visibility";
 
@@ -39,13 +38,14 @@ export default function AuthPage() {
   const onSubmit = async (data) => {
 
     try {
+      localStorage.setItem("pendingLoginEmail", data.email);
       await auth.login(data);
-      window.location.href = "/";
-    console.log("submit data:", data);
-
+      toast.success("Login successful! Please check your email for OTP.");
+      console.log(data);
+      window.location.href = "/verify-login";
     } catch (err) {
       console.error("Login failed:", err);
-      alert("Login failed!");
+      toast.error("Login failed!");
     }
   };
 
@@ -129,6 +129,7 @@ export default function AuthPage() {
             >
               {auth.loading ? "Loading..." : "Log in"}
             </Button>
+            <ToastContainer />
           </form>
 
           <Link href="/register" className="text-gray-500 text-center mt-4">
