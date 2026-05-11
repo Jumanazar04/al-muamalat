@@ -16,12 +16,12 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [lang, setLang] = useState("ENG");
+  const [profil, setProfil] = useState({});
   const pathname = usePathname();
   const isActiveHome = pathname === "/";
   const isActivePrograms = pathname.startsWith("/courses");
   const isActiveFinance = pathname === "/finance-tools";
   const isActiveContact = pathname === "/contact";
-  const profil = localStorage.getItem('user')
 
   const dropdownRef = useRef<HTMLDivElement>(null); 
   
@@ -34,6 +34,8 @@ export default function Navbar() {
   const courseList = coursesData?.data ?? [];
 
   useEffect(() => {
+    
+    setProfil(JSON.parse(localStorage.getItem('user') || '{}'));
     function handleClick(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setProgramsOpen(false);

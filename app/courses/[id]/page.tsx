@@ -5,9 +5,11 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams } from "next/dist/client/components/navigation";
 import { Check, Circle } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
+import { useEffect, useState } from "react";
 
 function CoursesDetails() {
   const params = useParams();
+  const [user, setUser] = useState<any>(null);
   
   interface SubmitData {
     course_id: string;
@@ -42,7 +44,9 @@ function CoursesDetails() {
 
   console.log(course);
 
-  const user: any = localStorage.getItem('user');
+  useEffect(() => {
+    setUser(localStorage.getItem('user'));
+   }, []);
   console.log(user);
   const parsedUser = JSON.parse(user);
   console.log(parsedUser);
