@@ -4,7 +4,9 @@ import { Bars3Icon, ChevronDownIcon, XMarkIcon } from "@heroicons/react/20/solid
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "../../public/Logo.svg";
-import coursesData from '../../services/courses'
+import { request } from "@/services/request";
+import { useQuery } from "@tanstack/react-query";
+import {usePathname} from 'next/navigation';
 
 const BRAND = "#009688";
 const BRAND_DARK = "#00796b";
@@ -14,11 +16,21 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [lang, setLang] = useState("ENG");
+  const pathname = usePathname();
+  const isActiveHome = pathname === "/";
+  const isActivePrograms = pathname.startsWith("/courses");
+  const isActiveFinance = pathname === "/finance-tools";
+  const isActiveContact = pathname === "/contact";
+  const profil = localStorage.getItem('user')
 
-  const dropdownRef = useRef<HTMLDivElement>(null); // ✅ type qo'shildi
+  const dropdownRef = useRef<HTMLDivElement>(null); 
+  
+  const { data: coursesData, isLoading, isError } = useQuery({
+    queryKey: ["courses"],
+    queryFn: () => request.get('/courses').then(res => res?.data),
+  });
 
 
-  // ✅ courseName va courses_id to'g'ri olinadi
   const courseList = coursesData?.data ?? [];
 
   useEffect(() => {
@@ -42,7 +54,7 @@ export default function Navbar() {
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-1">
-          <Link href="/" className="px-3.5 py-2 rounded-md text-sm font-medium" style={{ color: BRAND }}>
+          <Link href="/" className={isActiveHome ? `text-[#009688] px-3.5` : `text-gray-600 hover:text-[#009688] px-3.5`}>
             Home
           </Link>
 
@@ -50,7 +62,7 @@ export default function Navbar() {
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setProgramsOpen(!programsOpen)}
-              className="flex items-center gap-1 px-3.5 py-2 rounded-md text-sm text-gray-600 hover:text-[#009688] transition-colors"
+              className={ isActivePrograms ? `flex items-center gap-1 text-[#009688]` : `flex items-center gap-1 text-gray-600 hover:text-[#009688]`}
             >
               Programs
               <ChevronDownIcon
@@ -62,10 +74,10 @@ export default function Navbar() {
             {/* ✅ Link emas div, ichida har bir kurs o'z Link-iga ega */}
             {programsOpen && (
               <div className="absolute top-full left-0 mt-1.5 bg-white border border-gray-200 rounded-xl shadow-lg min-w-[180px] py-1.5 z-50">
-                {courseList.map((course: { id: number; name_uz: string }) => (
+                {courseList.map((course: { course_id: string; name_uz: string }) => (
                   <Link
-                    key={course.id}
-                    href={`/courses/${course.id}`}
+                    key={course.course_id}
+                    href={`/courses/${course.course_id}`}
                     onClick={() => setProgramsOpen(false)}
                     className="block px-4 py-2.5 text-sm text-gray-600 hover:bg-teal-50 hover:text-[#009688] transition-colors"
                   >
@@ -76,10 +88,10 @@ export default function Navbar() {
             )}
           </div>
 
-          <Link href="/finance-tools" className="px-3.5 py-2 rounded-md text-sm text-gray-600 hover:text-[#009688] transition-colors">
+          <Link href="/finance-tools" className={isActiveFinance ? `px-3.5 py-2 rounded-md text-sm text-[#009688]` : `px-3.5 py-2 rounded-md text-sm text-gray-600 hover:text-[#009688]`}>
             Finance tools
           </Link>
-          <Link href="/contact" className="px-3.5 py-2 rounded-md text-sm text-gray-600 hover:text-[#009688] transition-colors">
+          <Link href="/contact" className={isActiveContact ? `px-3.5 py-2 rounded-md text-sm text-[#009688]` : `px-3.5 py-2 rounded-md text-sm text-gray-600 hover:text-[#009688]`} >
             Contact
           </Link>
         </div>
@@ -118,15 +130,27 @@ export default function Navbar() {
           <div className="w-px h-7 bg-gray-200 hidden md:block" />
 
           {/* Sign in */}
-          <Link
-            href="/login"
-            className="text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors hidden md:flex"
-            style={{ backgroundColor: BRAND }}
-            onMouseEnter={(e) => ((e.target as HTMLElement).style.backgroundColor = BRAND_DARK)}
-            onMouseLeave={(e) => ((e.target as HTMLElement).style.backgroundColor = BRAND)}
-          >
-            Sign in
-          </Link>
+          {profil ? (
+            <Link
+              href="/profile"
+              className="text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors hidden md:flex"
+              style={{ backgroundColor: BRAND }}
+              onMouseEnter={(e) => ((e.target as HTMLElement).style.backgroundColor = BRAND_DARK)}
+              onMouseLeave={(e) => ((e.target as HTMLElement).style.backgroundColor = BRAND)}
+            >
+             Profile
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors hidden md:flex"
+              style={{ backgroundColor: BRAND }}
+              onMouseEnter={(e) => ((e.target as HTMLElement).style.backgroundColor = BRAND_DARK)}
+              onMouseLeave={(e) => ((e.target as HTMLElement).style.backgroundColor = BRAND)}
+            >
+              Sign in
+            </Link>
+          )}
 
           {/* Hamburger */}
           <button className="md:hidden w-10" onClick={() => setMobileOpen(true)}>
@@ -158,10 +182,10 @@ export default function Navbar() {
 
           {/* ✅ Mobile da ham real kurslar */}
           <p className="text-gray-600 font-medium">Programs</p>
-          {courseList.map((course: { id: number; name_uz: string }) => (
+          {courseList.map((course: { course_id: string; name_uz: string }) => (
             <Link
-              key={course.id}
-              href={`/courses/${course.id}`}
+              key={course.course_id}
+              href={`/courses/${course.course_id}`}
               onClick={() => setMobileOpen(false)}
               className="text-gray-500 pl-4"
             >

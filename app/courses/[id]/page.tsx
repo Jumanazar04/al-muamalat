@@ -1,23 +1,64 @@
 'use client'
 
 import { request } from "@/services/request";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams } from "next/dist/client/components/navigation";
 import { Check, Circle } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
 
 function CoursesDetails() {
   const params = useParams();
+  
+  interface SubmitData {
+    course_id: string;
+    user_id: any;
+  }
 
   const { data: course, isLoading, isError } = useQuery({
     queryKey: ["course", params?.id],
     queryFn: () => request.get(`/courses/${params?.id}`).then(res => res?.data?.data),
   });
 
+  const {mutate } = useMutation({
+    mutationKey: ["payment"],
+    mutationFn: (payload: SubmitData) => request.post('/courses/user', payload),
+    onSuccess: (res) => {
+      toast.success("Success!");
+      request.get(`courses/purchase/${res?.data?.data?.id}`).then(res => {
+        const url = res?.data?.data?.data;
+        if (url) {
+          const aTeg = document.createElement('a');
+          aTeg.href = url
+          aTeg.target = '_blank';
+          aTeg.click();
+          aTeg.remove();
+        }
+      });
+    },
+    onError: (err) => {
+      toast.error("Error!");
+    }
+  });
+
+  console.log(course);
+
+  const user: any = localStorage.getItem('user');
+  console.log(user);
+  const parsedUser = JSON.parse(user);
+  console.log(parsedUser);
+
+
+  const onSubmit = () => {
+    const submitData: SubmitData = {
+      course_id: course?.course_id,
+      user_id: parsedUser?.user?.userId, 
+    };
+    mutate(submitData);
+  }
+
   if (isLoading) return <div className="text-center py-20 text-gray-400">Yuklanmoqda...</div>;
   if (isError)   return <div className="text-center py-20 text-red-500">Xatolik yuz berdi</div>;
 
-  // -------------------------------------------------------
-  // Ma'lumotlar API javobiga qarab moslashtiring
   // -------------------------------------------------------
   const whatYouLearn: string[] = course?.what_you_learn ?? [];
   const whyStudy: string[]     = course?.why_study      ?? [];
@@ -183,9 +224,10 @@ function CoursesDetails() {
               ))}
             </ul>
           </div>
-          <button className="w-fit bg-teal-500 hover:bg-teal-600 transition-colors text-white font-semibold py-3 px-8 rounded-lg">
+          <button onClick={onSubmit} className="w-fit bg-teal-500 hover:bg-teal-600 transition-colors text-white font-semibold py-3 px-8 rounded-lg">
             Purchase Now
           </button>
+          <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
         </div>
       </section>
 
