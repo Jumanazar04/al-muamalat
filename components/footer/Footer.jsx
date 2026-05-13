@@ -1,12 +1,9 @@
 import Image from "next/image";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faTelegram,
-  faTwitter,
-  faFacebook,
-  faInstagram,
-  faLinkedin,
-} from "@fortawesome/free-brands-svg-icons";
+import  InstagramIcon  from "@mui/icons-material/Instagram";
+import  TelegramIcon  from "@mui/icons-material/Telegram";
+import  FacebookIcon  from "@mui/icons-material/Facebook";
+import  TwitterIcon  from "@mui/icons-material/Twitter";
+import  LinkedInIcon  from "@mui/icons-material/LinkedIn";
 
 export default function Footer() {
   return (
@@ -37,18 +34,19 @@ export default function Footer() {
           {/* SOCIAL MEDIA */}
           <div className="flex justify-center md:justify-end gap-4 text-lg">
             <a href="#" className="hover:text-gray-200">
-              <FontAwesomeIcon icon={faTwitter} />
-            </a>
-              <FontAwesomeIcon icon={faTelegram} />
-            
-            <a href="#" className="hover:text-gray-200">
-              <FontAwesomeIcon icon={faFacebook} />
+              <InstagramIcon />
             </a>
             <a href="#" className="hover:text-gray-200">
-              <FontAwesomeIcon icon={faInstagram} />
+              <TelegramIcon />
             </a>
             <a href="#" className="hover:text-gray-200">
-              <FontAwesomeIcon icon={faLinkedin} />
+              <FacebookIcon />
+            </a>
+            <a href="#" className="hover:text-gray-200">
+             <TwitterIcon />
+            </a>
+            <a href="#" className="hover:text-gray-200">
+              <LinkedInIcon />
             </a>
           </div>
         </div>

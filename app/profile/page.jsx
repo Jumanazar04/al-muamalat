@@ -90,9 +90,9 @@ export default function ProfilePage() {
   const avatarLetter = user?.full_name?.charAt(0)?.toUpperCase() || "U";
 
   return (
-    <div style={styles.page}>
+    <div style={styles.page} className="">
       {/* Tab buttons */}
-      <div style={styles.tabs}>
+      <div style={styles.tabs} className="max-w-6xl mx-auto">
         <button
           style={{
             ...styles.tab,
@@ -117,7 +117,8 @@ export default function ProfilePage() {
       </div>
 
       {/* Card */}
-      <div style={styles.card}>
+      <div className='container mx-auto max-w-7xl'>
+      <div style={styles.card} className='max-w-7xl'>
         {/* Header: Avatar + Name + Save */}
         <div style={styles.cardHeader}>
           <div style={styles.avatarRow}>
@@ -247,6 +248,7 @@ export default function ProfilePage() {
             </div>
           </div>
         </form>
+      </div>
       </div>
 
       <ToastContainer position="top-right" autoClose={3000} />

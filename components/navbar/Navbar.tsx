@@ -6,7 +6,7 @@ import Image from "next/image";
 import Logo from "../../public/Logo.svg";
 import { request } from "@/services/request";
 import { useQuery } from "@tanstack/react-query";
-import {usePathname} from 'next/navigation';
+import { usePathname } from "next/navigation";
 
 const BRAND = "#009688";
 const BRAND_DARK = "#00796b";
@@ -16,26 +16,36 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [lang, setLang] = useState("ENG");
-  const [profil, setProfil] = useState({});
+
+  // ✅ null = tekshirilmagan, {} = login qilinmagan, {...} = login qilingan
+  const [profil] = useState<Record<string, unknown>>(() => {
+    if (typeof window === "undefined") return {};
+
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : {};
+  });
+
   const pathname = usePathname();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   const isActiveHome = pathname === "/";
   const isActivePrograms = pathname.startsWith("/courses");
   const isActiveFinance = pathname === "/finance-tools";
   const isActiveContact = pathname === "/contact";
 
-  const dropdownRef = useRef<HTMLDivElement>(null); 
-  
-  const { data: coursesData, isLoading, isError } = useQuery({
-    queryKey: ["courses"],
-    queryFn: () => request.get('/courses').then(res => res?.data),
+  const { data: coursesData } = useQuery({
+    queryKey: ["navbar-courses"],
+    queryFn: () => request.get("/courses/main").then(res => res?.data),
+    // ✅ staleTime qo'shildi — har render da qayta so'rov yuborilmaydi
+    staleTime: 1000 * 60 * 5,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
-
 
   const courseList = coursesData?.data ?? [];
 
   useEffect(() => {
-    
-    setProfil(JSON.parse(localStorage.getItem('user') || '{}'));
+    // ✅ localStorage faqat bir marta o'qiladi
     function handleClick(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setProgramsOpen(false);
@@ -45,6 +55,9 @@ export default function Navbar() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
+  // ✅ To'g'ri tekshiruv: token yoki id bo'lsa login qilingan
+  const isLoggedIn = profil && Object.keys(profil).length > 0;
 
   return (
     <nav className="bg-white border-b border-gray-200 w-full">
@@ -56,15 +69,18 @@ export default function Navbar() {
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-1">
-          <Link href="/" className={isActiveHome ? `text-[#009688] px-3.5` : `text-gray-600 hover:text-[#009688] px-3.5`}>
+          <Link
+            href="/"
+            className={`px-3.5 py-2 rounded-md text-sm font-medium ${isActiveHome ? "text-[#009688]" : "text-gray-600 hover:text-[#009688]"}`}
+          >
             Home
           </Link>
 
           {/* Programs dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
-              onClick={() => setProgramsOpen(!programsOpen)}
-              className={ isActivePrograms ? `flex items-center gap-1 text-[#009688]` : `flex items-center gap-1 text-gray-600 hover:text-[#009688]`}
+              onClick={() => setProgramsOpen(prev => !prev)}
+              className={`flex items-center gap-1 px-3.5 py-2 rounded-md text-sm ${isActivePrograms ? "text-[#009688]" : "text-gray-600 hover:text-[#009688]"}`}
             >
               Programs
               <ChevronDownIcon
@@ -73,7 +89,6 @@ export default function Navbar() {
               />
             </button>
 
-            {/* ✅ Link emas div, ichida har bir kurs o'z Link-iga ega */}
             {programsOpen && (
               <div className="absolute top-full left-0 mt-1.5 bg-white border border-gray-200 rounded-xl shadow-lg min-w-[180px] py-1.5 z-50">
                 {courseList.map((course: { course_id: string; name_uz: string }) => (
@@ -90,10 +105,16 @@ export default function Navbar() {
             )}
           </div>
 
-          <Link href="/finance-tools" className={isActiveFinance ? `px-3.5 py-2 rounded-md text-sm text-[#009688]` : `px-3.5 py-2 rounded-md text-sm text-gray-600 hover:text-[#009688]`}>
+          <Link
+            href="/finance-tools"
+            className={`px-3.5 py-2 rounded-md text-sm ${isActiveFinance ? "text-[#009688]" : "text-gray-600 hover:text-[#009688]"}`}
+          >
             Finance tools
           </Link>
-          <Link href="/contact" className={isActiveContact ? `px-3.5 py-2 rounded-md text-sm text-[#009688]` : `px-3.5 py-2 rounded-md text-sm text-gray-600 hover:text-[#009688]`} >
+          <Link
+            href="/contact"
+            className={`px-3.5 py-2 rounded-md text-sm ${isActiveContact ? "text-[#009688]" : "text-gray-600 hover:text-[#009688]"}`}
+          >
             Contact
           </Link>
         </div>
@@ -103,7 +124,7 @@ export default function Navbar() {
           {/* Language Dropdown */}
           <div className="relative hidden md:flex items-center">
             <button
-              onClick={() => setLangOpen(!langOpen)}
+              onClick={() => setLangOpen(prev => !prev)}
               className="flex items-center gap-2 px-3 py-2 border rounded-lg text-sm"
             >
               <span>{lang === "ENG" ? "🇬🇧" : "🇺🇿"}</span>
@@ -113,16 +134,10 @@ export default function Navbar() {
 
             {langOpen && (
               <div className="absolute top-12 left-0 bg-white shadow-lg border rounded-lg w-28 overflow-hidden z-50">
-                <div
-                  onClick={() => { setLang("ENG"); setLangOpen(false); }}
-                  className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                >
+                <div onClick={() => { setLang("ENG"); setLangOpen(false); }} className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm">
                   🇬🇧 ENG
                 </div>
-                <div
-                  onClick={() => { setLang("UZ"); setLangOpen(false); }}
-                  className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                >
+                <div onClick={() => { setLang("UZ"); setLangOpen(false); }} className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm">
                   🇺🇿 UZ
                 </div>
               </div>
@@ -131,28 +146,16 @@ export default function Navbar() {
 
           <div className="w-px h-7 bg-gray-200 hidden md:block" />
 
-          {/* Sign in */}
-          {profil ? (
-            <Link
-              href="/profile"
-              className="text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors hidden md:flex"
-              style={{ backgroundColor: BRAND }}
-              onMouseEnter={(e) => ((e.target as HTMLElement).style.backgroundColor = BRAND_DARK)}
-              onMouseLeave={(e) => ((e.target as HTMLElement).style.backgroundColor = BRAND)}
-            >
-             Profile
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              className="text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors hidden md:flex"
-              style={{ backgroundColor: BRAND }}
-              onMouseEnter={(e) => ((e.target as HTMLElement).style.backgroundColor = BRAND_DARK)}
-              onMouseLeave={(e) => ((e.target as HTMLElement).style.backgroundColor = BRAND)}
-            >
-              Sign in
-            </Link>
-          )}
+          {/* ✅ isLoggedIn bilan to'g'ri tekshiruv */}
+          <Link
+            href={isLoggedIn ? "/profile" : "/login"}
+            className="text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors hidden md:flex"
+            style={{ backgroundColor: BRAND }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = BRAND_DARK)}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = BRAND)}
+          >
+            {isLoggedIn ? "Profile" : "Sign in"}
+          </Link>
 
           {/* Hamburger */}
           <button className="md:hidden w-10" onClick={() => setMobileOpen(true)}>
@@ -182,7 +185,6 @@ export default function Navbar() {
         <div className="flex flex-col p-4 gap-2 text-sm">
           <Link href="/" className="font-medium" style={{ color: BRAND }}>Home</Link>
 
-          {/* ✅ Mobile da ham real kurslar */}
           <p className="text-gray-600 font-medium">Programs</p>
           {courseList.map((course: { course_id: string; name_uz: string }) => (
             <Link
@@ -200,28 +202,21 @@ export default function Navbar() {
 
           <div className="h-px bg-gray-200 my-3" />
 
-          {/* Mobile lang */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setLang("ENG")}
-              className={`px-3 py-1 rounded text-sm ${lang === "ENG" ? "bg-gray-200" : ""}`}
-            >
+            <button onClick={() => setLang("ENG")} className={`px-3 py-1 rounded text-sm ${lang === "ENG" ? "bg-gray-200" : ""}`}>
               🇬🇧 ENG
             </button>
-            <button
-              onClick={() => setLang("UZ")}
-              className={`px-3 py-1 rounded text-sm ${lang === "UZ" ? "bg-gray-200" : ""}`}
-            >
+            <button onClick={() => setLang("UZ")} className={`px-3 py-1 rounded text-sm ${lang === "UZ" ? "bg-gray-200" : ""}`}>
               🇺🇿 UZ
             </button>
           </div>
 
           <Link
-            href="/login"
+            href={isLoggedIn ? "/profile" : "/login"}
             className="mt-4 text-white py-2 rounded-lg text-center transition-colors"
             style={{ backgroundColor: BRAND }}
           >
-            Sign in
+            {isLoggedIn ? "Profile" : "Sign in"}
           </Link>
         </div>
       </div>
