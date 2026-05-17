@@ -374,7 +374,7 @@ export default function ContactPage() {
                 </Box>
               </Box>
             </Grid>
-          </Box>
+          </Grid>
         </Container>
       </Box>
     </>
