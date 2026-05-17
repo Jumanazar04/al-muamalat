@@ -13,7 +13,7 @@ import {
   Stack,
   Divider,
 } from "@mui/material";
-import { toast, ToastContainer, Toaster } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import FacebookIcon from "@mui/icons-material/Facebook";
