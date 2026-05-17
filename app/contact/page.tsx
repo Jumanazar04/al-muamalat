@@ -149,7 +149,7 @@ export default function ContactPage() {
           </Box>
 
           {/* ── Two-column layout ── */}
-          <Box container spacing={{ xs: 6, md: 10, }} alignItems="flex-start" display="flex" flexDirection={{ xs: "row", md: "column" }} gap={6}>
+          <Grid container spacing={{ xs: 6, md: 10 }} alignItems="flex-start">
             {/* Left: info */}
             <Grid item xs={12} md={4}>
               <Stack spacing={4}>
